@@ -82,7 +82,7 @@ public partial class App : Application
 #if DEBUG
         MainWindow.UseStudio();
 #endif
-        MainWindow.SetWindowIcon();
+        //MainWindow.SetWindowIcon(); //TODO: figure out why SetWindowIcon() doesn't seem to exist
 
         Host = await builder.NavigateAsync<Shell>();
     }

@@ -37,5 +37,10 @@
       SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenCvSharp4" />
+    <PackageReference Include="OpenCvSharp4.runtime.linux-arm" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" />
+  </ItemGroup>
 
 </Project>
