@@ -3,7 +3,7 @@ using Uno.UI.Hosting;
 namespace RoboChaseController;
 internal class Program
 {
-    [STAThread]
+    //[STAThread]
     public static void Main(string[] args)
     {
 
@@ -14,7 +14,7 @@ internal class Program
             .UseMacOS()
             .UseWin32()
             .Build();
-
-        host.Run();
+        
+        host.Run(); // THIS IS BLOCKING (even when using RunAsync() instead)
     }
 }

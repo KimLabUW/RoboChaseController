@@ -70,7 +70,7 @@ public class TrackedObject
 
     /*---------------COMPUTED ATTRIBUTES---------------*/
     /// <value>checks that (x, y) position, (vx, vy) velocity, and (theta) orientation information is all present</value>
-    public bool HasAllData => !new List<double?>([_x, _y, _theta, _vx, _vy ]).Any(x => x == null);
+    public bool HasAllData => new List<double?>([_x, _y, _theta, _vx, _vy ]).All(x => x != null);
 
     /*---------------METHODS---------------*/
     /// <summary>
