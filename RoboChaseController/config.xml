@@ -1,1 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8" ?> 
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+    <RatHysteresis>0.9</RatHysteresis>
+    <RobotHysteresis>0.9</RobotHysteresis>
+    <ImageProcessingAlgorithm>0</ImageProcessingAlgorithm>
+    <ChaseAlgorithm>0</ChaseAlgorithm>
+</Config>

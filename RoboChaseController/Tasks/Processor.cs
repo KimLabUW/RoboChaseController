@@ -9,31 +9,50 @@ using Uno.Disposables;
 namespace RoboChaseController.Tasks;
 public abstract class Processor : IDisposable
 {
-    internal Config Config { get; set; }
     public bool Listening { get; private set; } = false;
     private ChannelReader<ImageData>? ChannelReader { get; set; } = null;
     private ChannelWriter<ImageData>? ChannelWriter { get; set; } = null;
     private CancellationTokenSource? ListenerCancellationTokenSource { get; set; } = null;
     private object _lock { get; } = new object();
 
-    public Processor(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null)
+    public Processor()
     {
-        Config = config;
-        UpdateConfig(config);
-        UpdateChannels(channelReader, channelWriter);
-        Start();
+        
     }
 
-    public virtual void UpdateConfig(Config config) { }
+    public void AddChannel(Processor reciever)
+    {
+        Channel<ImageData> channel = Channel.CreateUnbounded<ImageData>();
+        ChannelWriter = channel.Writer;
+        reciever.ChannelReader = channel.Reader;
+    }
 
-    public void UpdateChannels(ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null)
+    public void RemoveChannelReader()
     {
         if (Listening)
         {
             throw new InvalidOperationException("channel must be closed before it can be updated (Process.Stop())");
         }
-        ChannelReader = channelReader;
-        ChannelWriter = channelWriter;
+        ChannelReader?.TryDispose();
+        ChannelReader = null;
+    }
+
+    public void RemoveChannelWriter()
+    {
+        ChannelWriter?.TryDispose();
+        ChannelWriter = null;
+    }
+
+    public void RemoveChannels(bool removeReader = true, bool removeWriter = true)
+    {
+        if (removeReader)
+        {
+            RemoveChannelReader();
+        }
+        if (removeWriter)
+        {
+            RemoveChannelWriter();
+        }
     }
 
     public void Start()

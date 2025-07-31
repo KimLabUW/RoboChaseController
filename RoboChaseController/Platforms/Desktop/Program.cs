@@ -6,6 +6,7 @@ internal class Program
     //[STAThread]
     public static void Main(string[] args)
     {
+        Config.Load();
 
         var host = UnoPlatformHostBuilder.Create()
             .App(() => new App())

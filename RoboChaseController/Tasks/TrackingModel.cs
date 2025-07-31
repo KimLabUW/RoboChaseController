@@ -10,7 +10,7 @@ public class TrackingModel : Processor
 {
     private ImageData? PreviousImageData { get; set; } = null;
     private bool FirstComputation { get; set; } = true;
-    public TrackingModel(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null) : base(config, channelReader, channelWriter) { }
+    public TrackingModel() : base() { }
 
     internal override void OnMessageRecieved(ImageData imageData)
     {

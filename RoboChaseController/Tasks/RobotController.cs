@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace RoboChaseController.Tasks;
 public class RobotController : Processor
 {
-    public RobotController(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null) : base(config, channelReader, channelWriter)
+    public RobotController() : base()
     {
 
     }

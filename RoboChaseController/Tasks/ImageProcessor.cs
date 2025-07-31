@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace RoboChaseController.Tasks;
 public abstract class ImageProcessor : Processor
 {
-    public ImageProcessor(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null) : base(config, channelReader, channelWriter) { }
+    public ImageProcessor() : base() { }
 
     internal override void OnMessageRecieved(ImageData imageData)
     {

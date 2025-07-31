@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace RoboChaseController.Tasks;
 public class LEDImageProcessor : ImageProcessor
 {
-    public LEDImageProcessor(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null) : base(config, channelReader, channelWriter) { }
+    public LEDImageProcessor() : base() { }
 
     internal override void CalculatePositionsAndOrientations(ImageData imageData)
     {

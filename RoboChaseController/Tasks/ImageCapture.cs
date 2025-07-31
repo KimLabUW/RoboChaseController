@@ -8,13 +8,13 @@ using System.Threading.Channels;
 namespace RoboChaseController.Tasks;
 public class ImageCapture : Processor
 {
-    public ImageCapture(Config config, ChannelReader<ImageData>? channelReader = null, ChannelWriter<ImageData>? channelWriter = null) : base(config, channelReader, channelWriter)
+    public ImageCapture() : base()
     {
 
     }
 
     internal override void OnMessageRecieved(ImageData imageData)
     {
-
+        // this will likely stay empty
     }
 }
