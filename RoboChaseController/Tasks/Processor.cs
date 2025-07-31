@@ -61,6 +61,10 @@ public abstract class Processor : IDisposable
         {
             Listen();
         }
+        else
+        {
+            throw new ArgumentNullException(nameof(ChannelReader));
+        }
     }
 
     public void Listen()
@@ -73,7 +77,7 @@ public abstract class Processor : IDisposable
                 {
                     Listening = true;
                     ListenerCancellationTokenSource = new CancellationTokenSource();
-                    Task.Factory.StartNew(() => RecieveMessages(), ListenerCancellationTokenSource.Token);
+                    Task.Factory.StartNew(RecieveMessages, ListenerCancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                 }
             }
         }

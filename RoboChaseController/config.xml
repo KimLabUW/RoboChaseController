@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<Config>
-    <RatHysteresis>0.9</RatHysteresis>
-    <RobotHysteresis>0.9</RobotHysteresis>
-    <ImageProcessingAlgorithm>0</ImageProcessingAlgorithm>
-    <ChaseAlgorithm>0</ChaseAlgorithm>
-</Config>
+<?xml version="1.0" encoding="utf-8"?>
+<ConfigModel
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <RatHysteresis>0.9</RatHysteresis>
+  <RobotHysteresis>0.9</RobotHysteresis>
+  <ImageProcessingAlgorithm>LED</ImageProcessingAlgorithm>
+  <ChaseAlgorithm>StalkAndLunge</ChaseAlgorithm>
+</ConfigModel>

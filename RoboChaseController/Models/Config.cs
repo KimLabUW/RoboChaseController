@@ -5,51 +5,34 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using OpenCvSharp.Flann;
+using System.Xml.Serialization;
 
 namespace RoboChaseController.Models;
 public static class Config
 {
+    private const string ConfigXmlPath = "..\\..\\..\\config.xml";
     private static bool Updates { get; set; } = false;
-    public static double RatHysteresis { get; private set; } = 0.9;
-    public static double RobotHysteresis { get; private set; } = 0.9;
-    public static ImageProcessingAlgorithms ImageProcessingAlgorithm { get; private set; } = ImageProcessingAlgorithms.LED;
-    public static ChaseAlgorithms ChaseAlgorithm { get; private set; } = ChaseAlgorithms.StalkAndLunge;
+    private static ConfigModel ConfigModel { get; set; } = new ConfigModel(); // this gets overwritten later
+    public static double RatHysteresis { get => ConfigModel.RatHysteresis; set { Updates |= RatHysteresis != value; ConfigModel.RatHysteresis = value; Save(); } }
+    public static double RobotHysteresis { get => ConfigModel.RobotHysteresis; set { Updates |= RobotHysteresis != value; ConfigModel.RobotHysteresis = value; Save(); } }
+    public static ImageProcessingAlgorithms ImageProcessingAlgorithm { get => ConfigModel.ImageProcessingAlgorithm; set { Updates |= ImageProcessingAlgorithm != value; ConfigModel.ImageProcessingAlgorithm = value; Save(); } }
+    public static ChaseAlgorithms ChaseAlgorithm { get => ConfigModel.ChaseAlgorithm; set { Updates |= ChaseAlgorithm != value; ConfigModel.ChaseAlgorithm = value; Save(); } }
 
     public static void Load()
     {
-        //throw new NotImplementedException(); // TODO: load the xml file
-    }
-
-    public static void Update(double? ratHysteresis = null, double? robotHysteresis = null, ImageProcessingAlgorithms? imageProcessingAlgorithm = null, ChaseAlgorithms? chaseAlgorithm = null, bool save = true)
-    {
-        // Update the Parameters
-        if (ratHysteresis != null)
+        object? deserialized;
+        using (XmlReader reader = XmlReader.Create(ConfigXmlPath))
         {
-            Updates |= RatHysteresis != ratHysteresis.Value;
-            RatHysteresis = ratHysteresis.Value;
+            deserialized = new XmlSerializer(typeof(ConfigModel)).Deserialize(reader);
         }
-        if (robotHysteresis != null)
+        if (deserialized == null)
         {
-            Updates |= RobotHysteresis != robotHysteresis.Value;
-            RobotHysteresis = robotHysteresis.Value;
+            // TODO: log a warning
+            ConfigModel = new ConfigModel(); // Return a ConfigModel with Hard-Coded Default Values
         }
-        if (imageProcessingAlgorithm != null)
+        else
         {
-            Updates |= ImageProcessingAlgorithm != imageProcessingAlgorithm.Value;
-            ImageProcessingAlgorithm = imageProcessingAlgorithm.Value;
-        }
-        if (chaseAlgorithm != null)
-        {
-            Updates |= ChaseAlgorithm != chaseAlgorithm.Value;
-            ChaseAlgorithm = chaseAlgorithm.Value;
-        }
-        // TODO: add more parameter updates here
-
-        // Save the Updated Config File
-        if (save) 
-        { 
-            Save(); 
+            ConfigModel = (ConfigModel)deserialized;
         }
     }
 
@@ -57,10 +40,33 @@ public static class Config
     {
         if (Updates)
         {
-            // TODO: save the updated config file
+            XmlWriterSettings settings = new XmlWriterSettings()
+            {
+                Indent = true,
+                NewLineOnAttributes = true,
+                Async = true
+            };
+            
+            using (XmlWriter writer = XmlWriter.Create(ConfigXmlPath, settings))
+            {
+                new XmlSerializer(typeof(ConfigModel)).Serialize(writer, ConfigModel);
+            }
             Updates = false;
         }
     }
+}
+
+//[XmlRoot]
+public class ConfigModel
+{
+    [XmlElement]
+    public double RatHysteresis { get; set; } = 0.9;
+    [XmlElement]
+    public double RobotHysteresis { get; set; } = 0.9;
+    [XmlElement]
+    public ImageProcessingAlgorithms ImageProcessingAlgorithm { get; set; } = ImageProcessingAlgorithms.LED;
+    [XmlElement]
+    public ChaseAlgorithms ChaseAlgorithm { get; set; } = ChaseAlgorithms.StalkAndLunge;
 }
 
 public enum ImageProcessingAlgorithms
