@@ -10,10 +10,12 @@ namespace RoboChaseController.Tasks;
 public abstract class Processor<TWrite, TRead> : IDisposable
 {
     public bool Listening { get; private set; } = false;
+    public bool CanListen => ChannelReader != null;
+    public bool CanWriter => ChannelWriter != null;
     private ChannelReader<TRead>? ChannelReader { get; set; } = null;
     private ChannelWriter<TWrite>? ChannelWriter { get; set; } = null;
     private CancellationTokenSource? ListenerCancellationTokenSource { get; set; } = null;
-    private object _lock { get; } = new object();
+    protected internal object _lock { get; } = new object();
 
     public Processor()
     {
@@ -28,21 +30,21 @@ public abstract class Processor<TWrite, TRead> : IDisposable
     public void AddChannel(Processor<TWrite> reciever)
     {
         Channel<TWrite> channel = MakeChannel();
-        ChannelWriter = channel.Writer;
-        reciever.ChannelReader = channel.Reader;
+        AddChannelWriter(channel.Writer);
+        reciever.AddChannelReader(channel.Reader);
     }
 
     public void AddChannel(out ChannelWriter<TWrite> channelWriter, Processor<TWrite> reciever)
     {
         Channel<TWrite> channel = MakeChannel();
         channelWriter = channel.Writer;
-        reciever.ChannelReader = channel.Reader;
+        reciever.AddChannelReader(channel.Reader);
     }
 
     public void AddChannel(out ChannelReader<TWrite> channelReader)
     {
         Channel<TWrite> channel = MakeChannel();
-        ChannelWriter = channel.Writer;
+        AddChannelWriter(channel.Writer);
         channelReader = channel.Reader;
     }
 
@@ -60,6 +62,12 @@ public abstract class Processor<TWrite, TRead> : IDisposable
             throw new InvalidOperationException("channel must be closed before it can be updated (Process.Stop())");
         }
         ChannelReader = channelReader;
+    }
+
+    public void AddChannelWriter(ChannelWriter<TWrite> channelWriter)
+    {
+        RemoveChannelWriter();
+        ChannelWriter = channelWriter;
     }
 
     public void RemoveChannelReader()
@@ -154,7 +162,7 @@ public abstract class Processor<TWrite, TRead> : IDisposable
                     TRead messageData = await ChannelReader.ReadAsync();
                     if (messageData != null)
                     {
-                        OnMessageRecieved(messageData);
+                        _ = Task.Factory.StartNew(() => OnMessageRecieved(messageData));
                     }
                 }
             }
@@ -189,3 +197,30 @@ public class OutgoingChannel<T> : Processor<T>
     }
 }
 
+public class OutgoingChannel : OutgoingChannel<ImageData>
+{
+    public OutgoingChannel(out ChannelReader<ImageData> channelReader) : base(out channelReader) { }
+}
+
+public class IncomingChannel<T> : Processor<T>
+{
+    private Action<T> OnMessageRecievedAction { get; }
+
+    public IncomingChannel(out ChannelWriter<T> channelWriter, Action<T> onMessageRecieved)
+    {
+        OnMessageRecievedAction = onMessageRecieved;
+        Channel<T> channel = MakeChannel();
+        channelWriter = channel.Writer;
+        AddChannelReader(channel.Reader);
+    }
+
+    internal override void OnMessageRecieved(T messageData)
+    {
+        OnMessageRecievedAction(messageData);
+    }
+}
+
+public class IncomingChannel : IncomingChannel<ImageData>
+{
+    public IncomingChannel(out ChannelWriter<ImageData> channelWriter, Action<ImageData> onMessageRecieved) : base(out channelWriter, onMessageRecieved) { }
+}

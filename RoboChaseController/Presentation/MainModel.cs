@@ -10,9 +10,7 @@ public partial record MainModel
         INavigator navigator)
     {
         _navigator = navigator;
-        Title = "Main";
-        Title += $" - {localizer["ApplicationName"]}";
-        Title += $" - {appInfo?.Value?.Environment}";
+        Title = "RoboChase";
     }
 
     public string? Title { get; }

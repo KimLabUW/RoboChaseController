@@ -21,9 +21,16 @@ public class ImageCapture : Processor<ImageData, ImageProcessor>
 
     internal override void OnMessageRecieved(ImageProcessor imageProcessor)
     {
-        Stop();
-        RemoveChannelWriter();
-        AddChannel(imageProcessor);
-        Start();
+        // this is a command from the main controller to start sending messages to a different image processor
+        Task.Factory.StartNew(() =>
+        {
+            lock (_lock)
+            {
+                Stop();
+                RemoveChannelWriter();
+                AddChannel(imageProcessor);
+                Start();
+            }
+        });
     }
 }

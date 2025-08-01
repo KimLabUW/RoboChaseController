@@ -4,7 +4,7 @@ using Uno.UI.Hosting;
 namespace RoboChaseController;
 internal class Program
 {
-    //[STAThread]
+    [STAThread]
     public static void Main(string[] args)
     {
         var controller = new MainController(); // move this somewhere withing the GUI? And/or otherwise setup communication between the main controller and the GUI
