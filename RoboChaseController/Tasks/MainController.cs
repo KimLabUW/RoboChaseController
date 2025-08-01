@@ -30,6 +30,7 @@ public class MainController : Processor
                 ImageProcessor = new LEDImageProcessor();
                 break;
             case ImageProcessingAlgorithms.DeepLabCut:
+                throw new NotSupportedException("DeepLabCut image processing is currently not supported"); // Alex - feel free comment this out/delete this while you're working on the implementation
                 ImageProcessor = new DLCImageProcessor();
                 break;
             default:
@@ -69,6 +70,16 @@ public class MainController : Processor
     {
         base.Start(); // begins listening to messages from the Tracking Model
         // TODO: begin listening for messages from the GUI
+    }
+
+    public override void Stop()
+    {
+        // Stop the Threads in Forward Order
+        ImageCapture.Stop();
+        ImageProcessor.Stop();
+        TrackingModel.Stop();
+        base.Stop();
+        RobotController.Stop();
     }
 
     internal override void OnMessageRecieved(ImageData imageData)
