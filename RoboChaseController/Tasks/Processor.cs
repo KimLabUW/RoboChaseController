@@ -7,11 +7,11 @@ using System.Threading.Channels;
 using Uno.Disposables;
 
 namespace RoboChaseController.Tasks;
-public abstract class Processor : IDisposable
+public abstract class Processor<TWrite, TRead> : IDisposable
 {
     public bool Listening { get; private set; } = false;
-    private ChannelReader<ImageData>? ChannelReader { get; set; } = null;
-    private ChannelWriter<ImageData>? ChannelWriter { get; set; } = null;
+    private ChannelReader<TRead>? ChannelReader { get; set; } = null;
+    private ChannelWriter<TWrite>? ChannelWriter { get; set; } = null;
     private CancellationTokenSource? ListenerCancellationTokenSource { get; set; } = null;
     private object _lock { get; } = new object();
 
@@ -20,11 +20,46 @@ public abstract class Processor : IDisposable
         
     }
 
-    public void AddChannel(Processor reciever)
+    protected Channel<TWrite> MakeChannel()
     {
-        Channel<ImageData> channel = Channel.CreateUnbounded<ImageData>();
+        return Channel.CreateUnbounded<TWrite>();
+    }
+
+    public void AddChannel(Processor<TWrite> reciever)
+    {
+        Channel<TWrite> channel = MakeChannel();
         ChannelWriter = channel.Writer;
         reciever.ChannelReader = channel.Reader;
+    }
+
+    public void AddChannel(out ChannelWriter<TWrite> channelWriter, Processor<TWrite> reciever)
+    {
+        Channel<TWrite> channel = MakeChannel();
+        channelWriter = channel.Writer;
+        reciever.ChannelReader = channel.Reader;
+    }
+
+    public void AddChannel(out ChannelReader<TWrite> channelReader)
+    {
+        Channel<TWrite> channel = MakeChannel();
+        ChannelWriter = channel.Writer;
+        channelReader = channel.Reader;
+    }
+
+    public void AddChannel(out ChannelWriter<TWrite> channelWriter, out ChannelReader<TWrite> channelReader)
+    {
+        Channel<TWrite> channel = MakeChannel();
+        channelWriter = channel.Writer;
+        channelReader = channel.Reader;
+    }
+
+    public void AddChannelReader(ChannelReader<TRead> channelReader)
+    {
+        if (Listening)
+        {
+            throw new InvalidOperationException("channel must be closed before it can be updated (Process.Stop())");
+        }
+        ChannelReader = channelReader;
     }
 
     public void RemoveChannelReader()
@@ -55,7 +90,9 @@ public abstract class Processor : IDisposable
         }
     }
 
-    public void Start()
+    public virtual void NewRecording() { }
+
+    public virtual void Start()
     {
         if (ChannelReader != null)
         {
@@ -83,7 +120,7 @@ public abstract class Processor : IDisposable
         }
     }
 
-    public void Stop()
+    public virtual void Stop()
     {
         if (Listening)
         {
@@ -98,11 +135,11 @@ public abstract class Processor : IDisposable
         }
     }
 
-    public void SendMessage(ImageData imageData)
+    public void SendMessage(TWrite messageData)
     {
         if (ChannelWriter != null)
         {
-            ChannelWriter.WriteAsync(imageData);
+            ChannelWriter.WriteAsync(messageData);
         }
     }
 
@@ -114,17 +151,17 @@ public abstract class Processor : IDisposable
             {
                 if (await ChannelReader.WaitToReadAsync())
                 {
-                    ImageData imageData = await ChannelReader.ReadAsync();
-                    if (imageData != null)
+                    TRead messageData = await ChannelReader.ReadAsync();
+                    if (messageData != null)
                     {
-                        OnMessageRecieved(imageData);
+                        OnMessageRecieved(messageData);
                     }
                 }
             }
         }
     }
 
-    internal abstract void OnMessageRecieved(ImageData imageData);
+    internal abstract void OnMessageRecieved(TRead messageData);
 
     public void Dispose()
     {
@@ -134,3 +171,21 @@ public abstract class Processor : IDisposable
         ListenerCancellationTokenSource?.Dispose();
     }
 }
+
+public abstract class Processor<T> : Processor<T, T> { }
+
+public abstract class Processor : Processor<ImageData> { }
+
+public class OutgoingChannel<T> : Processor<T>
+{
+    public OutgoingChannel(out ChannelReader<T> channelReader)
+    {
+        AddChannel(out channelReader);
+    }
+
+    internal override void OnMessageRecieved(T messageData)
+    {
+        SendMessage(messageData); // Parrot the data - ideally this should not be used
+    }
+}
+

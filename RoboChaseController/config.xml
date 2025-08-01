@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ConfigModel
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <RatHysteresis>0.9</RatHysteresis>
-  <RobotHysteresis>0.9</RobotHysteresis>
-  <ImageProcessingAlgorithm>LED</ImageProcessingAlgorithm>
-  <ChaseAlgorithm>StalkAndLunge</ChaseAlgorithm>
-</ConfigModel>
+<Config
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <RatHysteresis>0.9</RatHysteresis>
+    <RobotHysteresis>0.9</RobotHysteresis>
+    <ImageProcessingAlgorithm>LED</ImageProcessingAlgorithm>
+    <ChaseAlgorithm>StalkAndLunge</ChaseAlgorithm>
+    <RatEnabled>true</RatEnabled>
+    <RobotEnabled>true</RobotEnabled>
+    <ShockerEnabled>true</ShockerEnabled>
+</Config>

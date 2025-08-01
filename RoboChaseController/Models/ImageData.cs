@@ -15,11 +15,6 @@ public class ImageData
     /*---------------PRIVATE GLOBAL ATTRIBUTES---------------*/
     private static long Id_global { get; set; } = 0;
 
-    /*---------------PUBLIC GLOBAL ATTRIBUTES---------------*/
-    public static bool HasRat { get; set; } = true; // TODO: move this to the config
-    public static bool HasRobot { get; set; } = true; // TODO: move this to the config
-    public static bool HasShocker { get; set; } = true; // TODO: move this to the config
-
     /*---------------DATA ATTRIBUTES---------------*/
     public long Id { get; }
     public DateTime TimeStamp { get; }
@@ -28,7 +23,10 @@ public class ImageData
     public TrackedObject Rat { get; }
     public TrackedObject Robot { get; }
 
+
     /*---------------COMPUTED ATTRIBUTES---------------*/
+    public bool HasRat => Config.RatEnabled && Rat.HasPosition && Rat.HasOrientation;
+    public bool HasRobot => Config.RobotEnabled && Robot.HasPosition && Robot.HasOrientation;
     public bool HasAllData => (!HasRat || Rat.HasAllData) && (!HasRobot || Robot.HasAllData); // for safety, this should be true of all frames which are used to guide the robot
 
     /*---------------METHODS---------------*/
@@ -69,8 +67,17 @@ public class TrackedObject
     public double VY { get { return _vy ?? -1; } set { _vy ??= value; } }
 
     /*---------------COMPUTED ATTRIBUTES---------------*/
+    /// <value>checks that (x, y) position data is not null</value>
+    public bool HasPosition => _vx.HasValue && _vy.HasValue;
+
+    /// <value>checks that (x, y) position data is not null</value>
+    public bool HasOrientation => _theta.HasValue;
+
+    /// <value>checks that (vx, vy) velocity data is not null</value>
+    public bool HasVelocity => _vx.HasValue && _vy.HasValue;
+
     /// <value>checks that (x, y) position, (vx, vy) velocity, and (theta) orientation information is all present</value>
-    public bool HasAllData => new List<double?>([_x, _y, _theta, _vx, _vy ]).All(x => x != null);
+    public bool HasAllData => HasPosition && HasOrientation && HasVelocity;
 
     /*---------------METHODS---------------*/
     /// <summary>

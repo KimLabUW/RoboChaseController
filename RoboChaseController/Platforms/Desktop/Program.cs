@@ -1,3 +1,4 @@
+using RoboChaseController.Tasks;
 using Uno.UI.Hosting;
 
 namespace RoboChaseController;
@@ -6,7 +7,8 @@ internal class Program
     //[STAThread]
     public static void Main(string[] args)
     {
-        Config.Load();
+        var controller = new MainController(); // move this somewhere withing the GUI? And/or otherwise setup communication between the main controller and the GUI
+        controller.Run();
 
         var host = UnoPlatformHostBuilder.Create()
             .App(() => new App())

@@ -6,15 +6,24 @@ using System.Threading.Tasks;
 using System.Threading.Channels;
 
 namespace RoboChaseController.Tasks;
-public class ImageCapture : Processor
+public class ImageCapture : Processor<ImageData, ImageProcessor>
 {
     public ImageCapture() : base()
     {
-
+        // TODO: test camera connection?
     }
 
-    internal override void OnMessageRecieved(ImageData imageData)
+    public override void Start()
     {
-        // this will likely stay empty
+        base.Start();
+        // TODO: start getting frames from the camera
+    }
+
+    internal override void OnMessageRecieved(ImageProcessor imageProcessor)
+    {
+        Stop();
+        RemoveChannelWriter();
+        AddChannel(imageProcessor);
+        Start();
     }
 }
